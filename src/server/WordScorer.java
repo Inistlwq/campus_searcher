@@ -37,6 +37,7 @@ public class WordScorer extends Scorer {
         this.valid = new boolean[fieldNum];
         this.avgLength = avgLength;
         this.idf = new float[fieldNum];
+        this.doc = -1;
         try {
             for (int i = 0; i < fieldNum; ++i) {
                 terms[i] = new Term(fields[i], word);
@@ -56,14 +57,14 @@ public class WordScorer extends Scorer {
         float res = 0;
         Document document = reader.document(doc);
         for (int i = 0; i < fieldNum; ++i) {
-            if (termDocs[i].doc() == docID()) {
+            if (termDocs[i].doc() == docID()
+                    && document.getField(fields[i]) != null) {
                 float len = document.getField(fields[i]).stringValue().length();
                 float tf = termDocs[i].freq();
                 double fscore = (K1 + 1) * tf;
                 fscore /= (K1 * (1 - b + b * len / avgLength[i]) + tf);
                 fscore *= idf[i];
                 res += fscore * boosts[i];
-            } else {
             }
         }
         res *= 10;
@@ -97,8 +98,9 @@ public class WordScorer extends Scorer {
                         continue;
                     }
                 }
-                if (termDocs[i].doc() < nextDoc)
+                if (termDocs[i].doc() < nextDoc) {
                     nextDoc = termDocs[i].doc();
+                }
             }
         }
 

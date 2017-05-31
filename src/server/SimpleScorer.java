@@ -15,14 +15,17 @@ final class SimpleScorer extends Scorer {
     protected SimpleScorer(Similarity similarity, Scorer[] scorers) {
         super(similarity);
         this.scorers = scorers;
-        this.doc = 0;
+        this.doc = -1;
     }
 
     @Override
     public float score() throws IOException {
         float score = 1.0f;
         for (int i = 0; i < scorers.length; ++i) {
-            score *= scorers[i].score();
+            if (scorers[i].docID() != docID()) {
+                continue;
+            }
+            score += scorers[i].score();
         }
         return score;
     }
@@ -44,33 +47,24 @@ final class SimpleScorer extends Scorer {
 
     @Override
     public int nextDoc() throws IOException {
-        int maxDoc = doc + 1;
-        int eqnCnt = 0;
-        if (this.doc == NO_MORE_DOCS) {
-            return NO_MORE_DOCS;
-        }
-        while (true) {
-            for (int i = 0; i < scorers.length; ++i) {
-                int nextDoc;
-                while (scorers[i].docID() < maxDoc) {
-                    nextDoc = scorers[i].nextDoc();
-                    if (nextDoc == NO_MORE_DOCS) {
-                        doc = NO_MORE_DOCS;
-                        return NO_MORE_DOCS;
+        int nextDoc = Integer.MAX_VALUE;
+        for (int i = 0; i < scorers.length; ++i) {
+            if (scorers[i].docID() != NO_MORE_DOCS) {
+                if (scorers[i].docID() == this.doc) {
+                    if (scorers[i].nextDoc() == NO_MORE_DOCS) {
+                        continue;
                     }
                 }
-
-                if (scorers[i].docID() > maxDoc) {
-                    maxDoc = scorers[i].docID();
-                    eqnCnt = 1;
-                } else {
-                    eqnCnt++;
+                if (scorers[i].docID() < nextDoc) {
+                    nextDoc = scorers[i].docID();
                 }
             }
-            if (eqnCnt >= scorers.length) {
-                doc = maxDoc;
-                return maxDoc;
-            }
+        }
+
+        if (nextDoc == Integer.MAX_VALUE) {
+            return doc = NO_MORE_DOCS;
+        } else {
+            return doc = nextDoc;
         }
     }
 
