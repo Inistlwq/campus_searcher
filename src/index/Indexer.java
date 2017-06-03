@@ -4,6 +4,7 @@ import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -358,8 +359,10 @@ public class Indexer {
     public static String genAbstract(List<String> tokens, String content) {
         int maxLength = 300;
         int range = 30;
-        String res = "";
+        String result = "";
         content = content.trim();
+        List<Integer> startPositions = new ArrayList<Integer>();
+        List<Integer> endPositions = new ArrayList<Integer>();
         for (String t : tokens) {
             String token = new String(t);
             int colonIndex = token.indexOf(':');
@@ -370,35 +373,70 @@ public class Indexer {
             Pattern pattern = Pattern.compile(token, Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(content);
 
-            while (matcher.find(pos)) {
+            int num = 0;
+            while (matcher.find(pos) && ++num < maxLength / range) {
                 pos = matcher.start();
-                int start, end;
-                for (start = pos; start >= pos - range; --start) {
-                    if (start < 0 || stopChar.contains(content.charAt(start))) {
-                        ++start;
-                        break;
-                    }
-                }
-                for (end = pos; end <= pos + range; ++end) {
-                    if (end >= content.length()
-                            || stopChar.contains(content.charAt(end))) {
-                        break;
-                    }
-                }
-                res += content.subSequence(start, pos);
-                res += "<em>";
-                for (int i = 0; i < token.length()
-                        && Character.toLowerCase(content.charAt(pos)) == token
-                                .charAt(i); ++i, ++pos) {
-                    res += content.charAt(pos);
-                }
-                res += "</em>" + content.subSequence(pos, end + 1) + "... ";
+                startPositions.add(pos);
+                endPositions.add(pos + token.length());
                 ++pos;
-                if (res.length() > maxLength) {
+            }
+        }
+        Collections.sort(startPositions);
+        Collections.sort(endPositions);
+        int i = 0;
+        int size = startPositions.size();
+        while (i < size) {
+            int pos = startPositions.get(i);
+            int end = endPositions.get(i);
+            int ptr;
+            for (ptr = pos; ptr >= pos - range; --ptr) {
+                if (ptr < 0 || stopChar.contains(content.charAt(ptr))) {
+                    ++ptr;
                     break;
                 }
             }
+            result += content.subSequence(ptr, pos);
+            result += "<em>";
+            result += content.subSequence(pos, end);
+            result += "</em>";
+            ++i;
+            while (i < size) {
+                pos = startPositions.get(i);
+                if (end > pos) {
+                    result += "<em>";
+                    result += content.subSequence(end, endPositions.get(i));
+                    result += "</em>";
+                    pos = end;
+                    end = endPositions.get(i);
+                    ++i;
+                } else {
+                    if (pos - end < range) {
+                        result += content.subSequence(end, pos);
+                        end = endPositions.get(i);
+                        result += "<em>";
+                        result += content.subSequence(pos, end);
+                        result += "</em>";
+                        ++i;
+                        if (result.length() > maxLength - range) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+            for (ptr = end; ptr < end + range; ++ptr) {
+                if (ptr >= content.length()
+                        || stopChar.contains(content.charAt(ptr))) {
+                    break;
+                }
+            }
+            result += content.subSequence(end, ptr) + "... ";
+
+            if (result.length() > maxLength) {
+                break;
+            }
         }
-        return res;
+        return result;
     }
 }

@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class Tool {
     public static String[] fields = { "title", "h", "anchorIn", "content",
             "anchorOut" };
-    public static float[] weight = { 1.0f, 0.25f, 0.2f, 0.2f, 0.05f };
+    public static float[] weight = { 1.0f, 0.8f, 0.6f, 0.4f, 0.1f };
     public static float[] avgLength = new float[5];
     public static Map<String, Float> weightMap = new HashMap<String, Float>();
     public static Map<String, Float> avgLengthMap = new HashMap<String, Float>();
