@@ -5,7 +5,7 @@
     String path = request.getContextPath();
     String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
     String rootPath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/files/";
-    String thuPath = "http://news.tsinghua.edu.cn/"; 
+    String thuPath = "http://news.tsinghua.edu.cn"; 
     String currentQuery=(String) request.getAttribute("currentQuery");
     int currentPage=(Integer) request.getAttribute("currentPage");
 %>

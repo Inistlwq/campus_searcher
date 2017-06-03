@@ -2,31 +2,39 @@ package server;
 
 import java.io.IOException;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.*;
 
 /**
  * Expert: A <code>Scorer</code> for documents matching a <code>Term</code>.
  */
 final class SimpleScorer extends Scorer {
+    private IndexReader reader;
     private Scorer[] scorers;
     private int doc;
 
     @SuppressWarnings("deprecation")
-    protected SimpleScorer(Similarity similarity, Scorer[] scorers) {
+    protected SimpleScorer(IndexReader reader, Similarity similarity,
+            Scorer[] scorers) {
         super(similarity);
+        this.reader = reader;
         this.scorers = scorers;
         this.doc = -1;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public float score() throws IOException {
-        float score = 1.0f;
+        float score = 0.0f;
         for (int i = 0; i < scorers.length; ++i) {
             if (scorers[i].docID() != docID()) {
                 continue;
             }
             score += scorers[i].score();
         }
+        Document document = reader.document(doc);
+        score += Float.valueOf(document.getField("pagerank").stringValue());
         return score;
     }
 

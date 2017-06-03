@@ -21,6 +21,12 @@ public class WordScorer extends Scorer {
     private float[] idf;
     private int doc;
 
+    private static final int BUFFER_SIZE = 1024;
+    private final int[][] docs; // buffered doc numbers
+    private final int[][] freqs; // buffered term frequents
+    private int[] pointer;
+    private int[] pointerMax;
+
     private float K1 = 2.0f;
     private float b = 0.75f;
 
@@ -38,13 +44,21 @@ public class WordScorer extends Scorer {
         this.avgLength = avgLength;
         this.idf = new float[fieldNum];
         this.doc = -1;
+        this.pointer = new int[fieldNum];
+        this.pointerMax = new int[fieldNum];
+        this.docs = new int[fieldNum][];
+        this.freqs = new int[fieldNum][];
         try {
             for (int i = 0; i < fieldNum; ++i) {
                 terms[i] = new Term(fields[i], word);
                 this.termDocs[i] = reader.termDocs(terms[i]);
                 idf[i] = similarity.idf(reader.docFreq(terms[i]),
                         reader.numDocs());
-                valid[i] = termDocs[i].next();
+                this.pointer[i] = -1;
+                this.pointerMax[i] = -1;
+                this.docs[i] = new int[BUFFER_SIZE];
+                this.freqs[i] = new int[BUFFER_SIZE];
+                valid[i] = true;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,21 +68,18 @@ public class WordScorer extends Scorer {
     @SuppressWarnings("deprecation")
     @Override
     public float score() throws IOException {
-        float res = 0;
+        float res = 0.0f;
         Document document = reader.document(doc);
         for (int i = 0; i < fieldNum; ++i) {
-            if (termDocs[i].doc() == docID()
+            if (valid[i] && docs[i][pointer[i]] == docID()
                     && document.getField(fields[i]) != null) {
                 float len = document.getField(fields[i]).stringValue().length();
-                float tf = termDocs[i].freq();
-                double fscore = (K1 + 1) * tf;
-                fscore /= (K1 * (1 - b + b * len / avgLength[i]) + tf);
-                fscore *= idf[i];
+                float tf = freqs[i][pointer[i]];
+                double fscore = (K1 + 1) * tf
+                        / (K1 * (1 - b + b * len / avgLength[i]) + tf) * idf[i];
                 res += fscore * boosts[i];
             }
         }
-        res *= 10;
-        res += Float.valueOf(document.getField("pagerank").stringValue());
         return res;
     }
 
@@ -87,20 +98,42 @@ public class WordScorer extends Scorer {
         return this.doc;
     }
 
+    private boolean refill(int i) throws IOException {
+        pointerMax[i] = termDocs[i].read(docs[i], freqs[i]);
+        if (pointerMax[i] != 0) {
+            pointer[i] = 0;
+            return true;
+        } else {
+            termDocs[i].close();
+            valid[i] = false;
+            return false;
+        }
+    }
+
     @Override
     public int nextDoc() throws IOException {
         int nextDoc = Integer.MAX_VALUE;
         for (int i = 0; i < fieldNum; ++i) {
             if (valid[i]) {
-                if (termDocs[i].doc() == this.doc) {
-                    if (!termDocs[i].next()) {
-                        valid[i] = false;
+                if (pointer[i] < 0) {
+                    if (!refill(i)) {
                         continue;
                     }
+                } else {
+                    if (docs[i][pointer[i]] == doc) {
+                        ++pointer[i];
+                        if (pointer[i] >= pointerMax[i]) {
+                            if (!refill(i)) {
+                                continue;
+                            }
+                        }
+                    }
                 }
-                if (termDocs[i].doc() < nextDoc) {
-                    nextDoc = termDocs[i].doc();
+                if (docs[i][pointer[i]] < nextDoc) {
+                    nextDoc = docs[i][pointer[i]];
                 }
+            } else {
+                continue;
             }
         }
 

@@ -71,7 +71,7 @@ public class SimpleQuery extends Query {
                 scorers[i] = new WordScorer(reader, word, fields, boosts,
                         avgLength, new SimpleSimilarity());
             }
-            return new SimpleScorer(new SimpleSimilarity(), scorers);
+            return new SimpleScorer(reader, new SimpleSimilarity(), scorers);
         }
 
         @Override

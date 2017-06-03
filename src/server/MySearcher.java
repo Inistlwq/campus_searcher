@@ -14,13 +14,9 @@ public class MySearcher {
     private IndexReader reader;
     private IndexSearcher searcher;
 
-    public String GetDir() {
-        return new String(System.getProperty("user.dir") + "/webapps/searcher/");
-    }
-
     public MySearcher(String indexdir) {
         try {
-            reader = IndexReader.open(FSDirectory.open(new File(GetDir()
+            reader = IndexReader.open(FSDirectory.open(new File(Tool.GetDir()
                     + indexdir)));
             searcher = new IndexSearcher(reader);
             searcher.setSimilarity(new SimpleSimilarity());

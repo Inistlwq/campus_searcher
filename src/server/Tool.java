@@ -14,10 +14,14 @@ public class Tool {
     public static Map<String, Float> weightMap = new HashMap<String, Float>();
     public static Map<String, Float> avgLengthMap = new HashMap<String, Float>();
 
+    public static String GetDir() {
+        return new String(System.getProperty("user.dir") + "/webapps/searcher/");
+    }
+
     static {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream("forIndex/global.txt")));
+                    new FileInputStream(GetDir() + "forIndex/global.txt")));
             for (int i = 0; i < fields.length; ++i) {
                 avgLength[i] = Float.valueOf(reader.readLine());
                 weightMap.put(fields[i], weight[i]);

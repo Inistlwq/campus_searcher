@@ -1,7 +1,10 @@
 package index;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,14 +79,25 @@ public class Indexer {
 
             BufferedReader reader = new BufferedReader(new FileReader(filename));
             String line;
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            System.out.println(format.format(new Date()) + " : Start");
             while ((line = reader.readLine()) != null) {
                 if (line.equals("")) {
                     break;
                 }
-                String[] items = line.split("\t", 3);
+                String[] items = line.split("\t", 4);
                 String loc = items[0];
                 String pagerank = items[1];
-                String anchorIn = items[2];
+                String anchorIn;
+                if (items[2].equals("null")) {
+                    if (items[3].equals("null")) {
+                        anchorIn = "";
+                    } else {
+                        anchorIn = items[3];
+                    }
+                } else {
+                    anchorIn = items[2];
+                }
 
                 File res;
                 try {
@@ -115,8 +129,9 @@ public class Indexer {
                 }
                 if (success) {
                     indexWriter.addDocument(document);
-                    if (++num % 10000 == 0) {
-                        System.out.println("process " + num);
+                    if (++num % 1000 == 0) {
+                        System.out.println(format.format(new Date())
+                                + " : process " + num);
                     }
                 }
             }
