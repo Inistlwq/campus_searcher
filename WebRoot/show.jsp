@@ -23,17 +23,18 @@
 </head>
 <body style="margin:0; padding:0">
     <div id="header" style="margin:0 auto; background-color:#5C307D; height:100%; width:100%; padding:20px">
-        <img src="<%=path%>/static/img/logo.png" style="margin-top:20px; margin-bottom:20px"/>
+        <img src="<%=path%>/static/img/logo.png" style="margin-left:10%; margin-right:20%;margin-top:20px; margin-bottom:20px"/>
         <form id="form1" name="form1" method="get" action="Server">
-            <div style="float:left">
+            <div style="float:left;margin-left:10%; margin-right:20%">
                 <input name="query" value="<%=currentQuery%>" type="text" size="70" style="width:400px; float:left"/>
                 <input type="submit" name="Submit" value="查询" style="width:80px; float:right"/>
             </div>
         </form>
-        <div style="font: 0px/0px sans-serif;clear: both;display: block"> </div> 
+        <div style="font: 0px/0px sans-serif;clear: both;display: block"></div> 
     </div>
-
-    <div id="content"  style="margin-left:50px; margin-right:100px; margin-top:50px">
+    
+    <div id = "main_content" style="margin-left:10%; margin-right:20%; margin-top:50px">
+    <div id="content">
         <Table style="left: 0px; width: 594px;">
         <% 
             String[] titles=(String[]) request.getAttribute("titles");
@@ -52,7 +53,7 @@
           		<p><tr><h3>No such result</h3></tr></p>
           	<%}; %>
       	</Table>
-  	<div>
+  	</div>
   	<div id="footer">
 	<%if(currentPage>1){ %>
 		<a href="Server?query=<%=currentQuery%>&page=<%=currentPage-1%>">上一页</a>
@@ -65,5 +66,6 @@
 		<a href="Server?query=<%=currentQuery%>&page=<%=i%>"><%=i%></a>
 	<%}; %>
 	    <a href="Server?query=<%=currentQuery%>&page=<%=currentPage+1%>">下一页</a>
+	</div>
 	</div>
 </body>

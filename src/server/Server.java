@@ -8,13 +8,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.queryParser.MultiFieldQueryParser;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 
 
-import java.util.*;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.util.Version;
+import org.wltea.analyzer.lucene.IKAnalyzer;
 
+import java.util.*;
 import java.net.*;
 
 public class Server extends HttpServlet {
@@ -66,7 +73,31 @@ public class Server extends HttpServlet {
             String[] absts = null;
             String[] paths = null;
             String[] types = null;
-            TopDocs results = search.searchQuery(queryString, 100);
+            // TopDocs results = search.searchQuery(queryString, 100);
+            
+            //TopDocs results = search.searchQuery(queryString, 100);
+            //待查找字符串对应的字段
+            /*
+			Analyzer analyzer = new IKAnalyzer(true);//true智能切分
+			String [] to_query = {queryString, queryString,queryString,queryString, queryString};
+			// {"content"};
+            //Occur.MUST表示对应字段必须有查询值， Occur.MUST_NOT 表示对应字段必须没有查询值， Occur.SHOULD(结果“或”)
+            */
+            Occur[] occ={Occur.SHOULD, Occur.SHOULD, Occur.SHOULD, Occur.SHOULD, Occur.SHOULD};
+			String [] fields = Tool.fields;
+            Query query = null;
+            MultiFieldQueryParser parser = null;
+			try {
+				parser = new MultiFieldQueryParser(Version.LUCENE_35, fields, new IKAnalyzer(true));
+				query = parser.parse(queryString);
+				// query = MultiFieldQueryParser.parse(Version.LUCENE_35, to_query,fields,occ,analyzer);
+				System.out.println(query.toString());
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            TopDocs results = search.searchQuery(query, 100);
+            
             if (results != null) {
                 ScoreDoc[] hits = showList(results.scoreDocs, page);
                 if (hits != null) {
