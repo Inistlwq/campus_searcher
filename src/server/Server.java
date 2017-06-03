@@ -15,6 +15,8 @@ import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.queryParser.QueryParser;
+
 
 
 import org.apache.lucene.search.BooleanClause.Occur;
@@ -85,12 +87,26 @@ public class Server extends HttpServlet {
             */
             Occur[] occ={Occur.SHOULD, Occur.SHOULD, Occur.SHOULD, Occur.SHOULD, Occur.SHOULD};
 			String [] fields = Tool.fields;
+			Map<String, Float> boosts = new HashMap<String, Float>();
+			/*
+			 * public static String[] fields = { "title", "h", "anchorIn", "content",
+            "anchorOut" };
+    public static float[] weight = { 1.0f, 0.8f, 0.6f, 0.4f, 0.1f };
+			 * */
+			boosts.put("title", 1.0f);
+			boosts.put("h", 0.8f);
+			boosts.put("anchorIn", 0.6f);    
+			boosts.put("content", 0.4f);
+			boosts.put("anchorOut", 0.1f);
             Query query = null;
             MultiFieldQueryParser parser = null;
 			try {
-				parser = new MultiFieldQueryParser(Version.LUCENE_35, fields, new IKAnalyzer(true));
+				parser = new MultiFieldQueryParser(Version.LUCENE_35, fields, new IKAnalyzer(true), boosts);
+				parser.setDefaultOperator(QueryParser.AND_OPERATOR);
 				query = parser.parse(queryString);
-				// query = MultiFieldQueryParser.parse(Version.LUCENE_35, to_query,fields,occ,analyzer);
+				query.setBoost(1.0f);
+				// search.setSimilarity(new SimpleSimilarity());
+				// query = MultiFieldQueryPsarser.parse(Version.LUCENE_35, to_query,fields,occ,analyzer);
 				System.out.println(query.toString());
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
