@@ -37,6 +37,23 @@ public class MySearcher {
         }
         return null;
     }
+    
+    /*MultifieldQuery*/
+    public TopDocs searchQuery(Query queryString,int maxnum){
+		try {
+			// Term term=new Term(field,queryString);
+			// Query query=new SimpleQuery(term,avgLength);
+			// query.setBoost(1.0f);
+			//Weight w=searcher.createNormalizedWeight(query);
+			// System.out.println("in "+ queryString);
+			TopDocs results = searcher.search(queryString, maxnum);
+			System.out.println(results);
+			return results;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
     public Document getDoc(int docID) {
         try {
