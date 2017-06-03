@@ -3,17 +3,19 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="melibrary.com.genuitec.eclipse.j2eedt.core.MYECLIPSE_JAVAEE_5_CONTAINER"/>
-	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/commons-logging-1.1.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/fontbox-1.8.1.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/IKAnalyzer3.2.5Stable.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/jsoup-1.7.2.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/lucene-core-3.5.0.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/pdfbox-1.8.1.jar"/>
-	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-ooxml-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-3.16/lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-3.16/ooxml-lib/xmlbeans-2.6.0.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-3.16/poi-3.16.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-3.16/poi-ooxml-3.16.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-3.16/poi-ooxml-schemas-3.16.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/servlet-api.jar"/>
-	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/xmlbeans-2.3.0.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-3.16/poi-scratchpad-3.16.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/poi-3.16/lib/commons-collections4-4.1.jar"/>
 	<classpathentry kind="output" path="WebRoot/WEB-INF/classes"/>
 </classpath>

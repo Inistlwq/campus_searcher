@@ -27,6 +27,7 @@ import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.poi.POIXMLDocument;
+import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 
 import org.jsoup.Jsoup;
@@ -120,11 +121,13 @@ public class Indexer {
                 document.setBoost(Float.parseFloat(pagerank));
 
                 boolean success = false;
-                if (loc.endsWith(".html") || loc.endsWith(".htm")) {
+                if (loc.toLowerCase().endsWith(".html")
+                        || loc.toLowerCase().endsWith(".htm")) {
                     success = parseHtml(res, document);
-                } else if (loc.endsWith(".doc") || loc.endsWith(".docx")) {
+                } else if (loc.toLowerCase().endsWith(".doc")
+                        || loc.toLowerCase().endsWith(".docx")) {
                     success = parseDoc(res, document);
-                } else if (loc.endsWith(".pdf")) {
+                } else if (loc.toLowerCase().endsWith(".pdf")) {
                     success = parsePdf(res, document);
                 }
                 if (success) {
@@ -250,12 +253,42 @@ public class Indexer {
         }
     }
 
-    private boolean parseDoc(File in, Document doc) {
+    private String getDocContent(File in) {
+        try {
+            WordExtractor doc = new WordExtractor(new FileInputStream(in));
+            String content = doc.getText();
+            doc.close();
+            return content;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private String getDocxContent(File in) {
         try {
             XWPFWordExtractor docx = new XWPFWordExtractor(
                     POIXMLDocument.openPackage(in.getAbsolutePath()));
-
             String content = docx.getText();
+            docx.close();
+            return content;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private boolean parseDoc(File in, Document doc) {
+        try {
+            String content;
+            String name = in.getName().toLowerCase();
+            if (name.endsWith("doc")) {
+                content = getDocContent(in);
+            } else if (name.endsWith("docx")) {
+                content = getDocxContent(in);
+            } else {
+                return false;
+            }
             contentAvgLength += content.length();
             Field contentField = new Field("content", content, Field.Store.YES,
                     Field.Index.ANALYZED);
