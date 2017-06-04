@@ -247,13 +247,15 @@ public class Indexer {
             }
             Field titleField = new Field("title", title, Field.Store.YES,
                     Field.Index.ANALYZED);
+            titleField.setBoost(pagerank);
+
             doc.add(titleField);
             titleAvgLength += title.length();
 
             String content = "";
             String anchorOut = "";
             String hStr = "";
-            Elements elements = html.getElementsByTag("article");
+            Elements elements = html.getElementsByClass("article");
             if (elements.size() > 0) {
                 for (org.jsoup.nodes.Element e : elements.get(0).select(
                         "p,span,td,div,li,a")) {
@@ -283,11 +285,15 @@ public class Indexer {
             Field contentField = new Field("content", content, Field.Store.YES,
                     Field.Index.ANALYZED);
             doc.add(contentField);
+            contentField.setBoost(pagerank);
+
             contentAvgLength += content.length();
 
             Field anchorOutField = new Field("anchorOut", anchorOut,
                     Field.Store.YES, Field.Index.ANALYZED);
             doc.add(anchorOutField);
+            anchorOutField.setBoost(pagerank);
+
             anchorOutAvgLength += anchorOut.length();
             if (anchorOut.length() > 0) {
                 ++anchorOutNum;
@@ -296,6 +302,7 @@ public class Indexer {
             Field hField = new Field("h", hStr, Field.Store.YES,
                     Field.Index.ANALYZED);
             doc.add(hField);
+            hField.setBoost(pagerank);
             hAvgLength += hStr.length();
             if (hStr.length() > 0) {
                 ++hNum;

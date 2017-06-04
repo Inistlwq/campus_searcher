@@ -94,9 +94,9 @@ public class Server extends HttpServlet {
  			Map<String, Float> boosts = new HashMap<String, Float>();
  			boosts.put("title", 100.0f);
  			boosts.put("h", 25.0f);
- 			boosts.put("anchorIn", 30.0f);    
- 			boosts.put("content", 5.0f);
- 			boosts.put("anchorOut", 0.5f);
+ 			boosts.put("anchorIn", 35.0f);    
+ 			boosts.put("content", 1.0f);
+ 			boosts.put("anchorOut", 0.0f);
             MultiFieldQueryParser parser = null;
  			parser = new MultiFieldQueryParser(Version.LUCENE_40, fields, analyzer, boosts);
  			parser.setDefaultOperator(QueryParser.AND_OPERATOR);

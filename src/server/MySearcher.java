@@ -42,10 +42,6 @@ public class MySearcher {
 
     public TopDocs searchQuery(Query query, int maxnum) {
         try {
-            // 
-     			
-        	
-           
             TopDocs results = searcher.search(query, maxnum);
             System.out.println(results);
             return results;
