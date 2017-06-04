@@ -13,14 +13,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.wltea.analyzer.lucene.IKAnalyzer;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;//.TermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -30,15 +30,15 @@ import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.poi.POIXMLDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-
 import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 
-import server.SimpleSimilarity;
 
 @SuppressWarnings("deprecation")
 public class Indexer {
     private Analyzer analyzer;
     private IndexWriter indexWriter;
+    private static String page_root = "C:/newwork/Heritrix/jobs/No_dd.yyyy-20170524164321461/mirror/news.tsinghua.edu.cn";
 
     private float anchorInAvgLength = 1.0f;
     private float anchorOutAvgLength = 1.0f;
@@ -51,11 +51,11 @@ public class Indexer {
     public Indexer(String indexDir) {
         analyzer = new IKAnalyzer();
         try {
-            IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_35,
+            IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_40,
                     analyzer);
             Directory dir = FSDirectory.open(new File(indexDir));
             indexWriter = new IndexWriter(dir, iwc);
-            indexWriter.setSimilarity(new SimpleSimilarity());
+            // indexWriter.setSimilarity(new BM25Similarity());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,6 +75,8 @@ public class Indexer {
         }
     }
 
+    float pagerank;
+    
     public void indexFiles(String filename, String rootDir) {
         try {
             int num = 0;
@@ -89,7 +91,9 @@ public class Indexer {
                 }
                 String[] items = line.split("\t", 4);
                 String loc = items[0];
-                String pagerank = items[1];
+                //String pagerank = items[1];
+                pagerank = Float.parseFloat(items[1]);
+                pagerank = (float) (16 + Math.log(pagerank));
                 String anchorIn;
                 if (items[2].equals("null")) {
                     if (items[3].equals("null")) {
@@ -112,14 +116,15 @@ public class Indexer {
                 Field pathField = new Field("path", loc, Field.Store.YES,
                         Field.Index.NO);
                 document.add(pathField);
-                Field pagerankField = new Field("pagerank", pagerank,
-                        Field.Store.YES, Field.Index.NO);
-                document.add(pagerankField);
+                //Field pagerankField = new Field("pagerank", pagerank,
+                //        Field.Store.YES, Field.Index.NO);
+                //document.add(pagerankField);
                 Field anchorInField = new Field("anchorIn", anchorIn,
                         Field.Store.YES, Field.Index.ANALYZED);
+                anchorInField.setBoost(pagerank);
                 document.add(anchorInField);
                 anchorInAvgLength += anchorIn.length();
-                document.setBoost(Float.parseFloat(pagerank));
+                // document.setBoost(Float.parseFloat(pagerank));
 
                 boolean success = false;
                 if (loc.toLowerCase().endsWith(".html")
@@ -164,6 +169,71 @@ public class Indexer {
         }
     }
 
+    /*private boolean parseHtml(File in, Document doc) {
+        try {
+            org.jsoup.nodes.Document html = Jsoup.parse(in, "utf-8");
+
+            // title
+            String title = "";
+            org.jsoup.select.Elements titleEles = html
+                    .getElementsByTag("title");
+            if (titleEles.size() > 0) {
+                title = titleEles.get(0).text();
+            }
+            Field titleField = new Field("title", title, Field.Store.YES,
+                    Field.Index.ANALYZED);
+            titleField.setBoost(pagerank);
+            doc.add(titleField);
+            titleAvgLength += title.length();
+
+            // content
+            String content = "";
+            for (org.jsoup.nodes.Element e : html.select("p,span,td,div,li,a")) {
+                content += ' ' + e.ownText();
+            }
+            Field contentField = new Field("content", content, Field.Store.YES,
+                    Field.Index.ANALYZED);
+            contentField.setBoost(pagerank);
+            doc.add(contentField);
+            contentAvgLength += content.length();
+
+            String anchorOut = "";
+            for (org.jsoup.nodes.Element e : html.getElementsByTag("a")) {
+                anchorOut += ' ' + e.text();
+            }
+            Field anchorOutField = new Field("anchorOut", anchorOut,
+                    Field.Store.YES, Field.Index.ANALYZED);
+            anchorOutField.setBoost(pagerank);
+            doc.add(anchorOutField);
+            anchorOutAvgLength += anchorOut.length();
+            if (anchorOut.length() > 0) {
+                ++anchorOutNum;
+            }
+
+            String hStr = "";
+            for (org.jsoup.nodes.Element e : html
+                    .getElementsByTag("h1,h2,h3,h4,h5,h6")) {
+                hStr += e.ownText();
+            }
+            Field hField = new Field("h", hStr, Field.Store.YES,
+                    Field.Index.ANALYZED);
+            hField.setBoost(pagerank);
+            doc.add(hField);
+            hAvgLength += hStr.length();
+            if (hStr.length() > 0) {
+                ++hNum;
+            }
+
+            doc.add(new Field("type", "htm", Field.Store.YES,
+                    Field.Index.NOT_ANALYZED));
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }*/
+    
     private boolean parseHtml(File in, Document doc) {
         try {
             org.jsoup.nodes.Document html = Jsoup.parse(in, "utf-8");
@@ -180,20 +250,41 @@ public class Indexer {
             doc.add(titleField);
             titleAvgLength += title.length();
 
-            // content
             String content = "";
-            for (org.jsoup.nodes.Element e : html.select("p,span,td,div,li,a")) {
-                content += ' ' + e.ownText();
+            String anchorOut = "";
+            String hStr = "";
+            Elements elements = html.getElementsByTag("article");
+            if (elements.size() > 0) {
+                for (org.jsoup.nodes.Element e : elements.get(0).select(
+                        "p,span,td,div,li,a")) {
+                    content += ' ' + e.ownText();
+                }
+                for (org.jsoup.nodes.Element e : elements.get(0)
+                        .getElementsByTag("a")) {
+                    anchorOut += ' ' + e.text();
+                }
+                for (org.jsoup.nodes.Element e : elements.get(0)
+                        .getElementsByTag("h1,h2,h3,h4,h5,h6")) {
+                    hStr += e.ownText();
+                }
+            } else {
+                for (org.jsoup.nodes.Element e : html
+                        .select("p,span,td,div,li,a")) {
+                    content += ' ' + e.ownText();
+                }
+                for (org.jsoup.nodes.Element e : html.getElementsByTag("a")) {
+                    anchorOut += ' ' + e.text();
+                }
+                for (org.jsoup.nodes.Element e : html
+                        .getElementsByTag("h1,h2,h3,h4,h5,h6")) {
+                    hStr += e.ownText();
+                }
             }
             Field contentField = new Field("content", content, Field.Store.YES,
                     Field.Index.ANALYZED);
             doc.add(contentField);
             contentAvgLength += content.length();
 
-            String anchorOut = "";
-            for (org.jsoup.nodes.Element e : html.getElementsByTag("a")) {
-                anchorOut += ' ' + e.text();
-            }
             Field anchorOutField = new Field("anchorOut", anchorOut,
                     Field.Store.YES, Field.Index.ANALYZED);
             doc.add(anchorOutField);
@@ -202,11 +293,6 @@ public class Indexer {
                 ++anchorOutNum;
             }
 
-            String hStr = "";
-            for (org.jsoup.nodes.Element e : html
-                    .getElementsByTag("h1,h2,h3,h4,h5,h6")) {
-                hStr += e.ownText();
-            }
             Field hField = new Field("h", hStr, Field.Store.YES,
                     Field.Index.ANALYZED);
             doc.add(hField);
@@ -237,11 +323,13 @@ public class Indexer {
 
             Field contentField = new Field("content", content, Field.Store.YES,
                     Field.Index.ANALYZED);
+            contentField.setBoost(pagerank);
             doc.add(contentField);
 
             String title = in.getName();
             Field titleField = new Field("title", title, Field.Store.YES,
                     Field.Index.NOT_ANALYZED);
+            titleField.setBoost(pagerank);
             doc.add(titleField);
 
             doc.add(new Field("type", "pdf", Field.Store.YES,
@@ -293,11 +381,13 @@ public class Indexer {
             contentAvgLength += content.length();
             Field contentField = new Field("content", content, Field.Store.YES,
                     Field.Index.ANALYZED);
+            contentField.setBoost(pagerank);
             doc.add(contentField);
 
             String title = in.getName();
             Field titleField = new Field("title", title, Field.Store.YES,
                     Field.Index.NOT_ANALYZED);
+            titleField.setBoost(pagerank);
             doc.add(titleField);
 
             doc.add(new Field("type", "doc", Field.Store.YES,
@@ -311,7 +401,7 @@ public class Indexer {
 
     public static void main(String[] args) {
         Indexer indexer = new Indexer("WebRoot/forIndex/index");
-        indexer.indexFiles("pagerank.txt", "files/");
+        indexer.indexFiles("pagerank.txt", page_root);
         indexer.saveGlobals("WebRoot/forIndex/global.txt");
     }
 
@@ -326,11 +416,17 @@ public class Indexer {
             if (colonIndex >= 0) {
                 tokens.add(part);
             } else {
-                TokenStream ts = analyzer.tokenStream("content",
-                        new StringReader(part));
+                TokenStream ts;
+				try {
+					ts = analyzer.tokenStream("content",
+					        new StringReader(part));
+				} catch (IOException e) {
+					e.printStackTrace();
+					return tokens;
+				}
                 try {
                     while (ts.incrementToken()) {
-                        tokens.add(ts.getAttribute(TermAttribute.class).term());
+                        tokens.add(ts.getAttribute(CharTermAttribute.class).toString());
                     }
 
                 } catch (Exception e) {

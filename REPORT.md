@@ -18,6 +18,8 @@ password: 01c6023dacda00474e342dc0ba449ac06eaf44c7
 综合运用搜索引擎体系结构和核心算法方面的知识，基于开源资源搭建搜索引擎
 
 # 开源搜索引擎工具资源：
+- Heritrix 1.14.4
+- Lucene 4.0
 - 抓取工具： Heritrix (http://crawler.archive.org/)
 - 索引构建及检索工具：Lucene (http://lucene.apache.org/)
 - 分词工具：ICTCLAS分词工具(http://ictclas.org/)或庖丁解牛分词包(http://code.google.com/p/paoding/)
@@ -49,16 +51,6 @@ password: 01c6023dacda00474e342dc0ba449ac06eaf44c7
     - 是否可能设计与主流搜索引擎展现方式不同的界面？
 
 
-# 扩展内容
-- 任何自己感兴趣的附加内容，建议选择一个点进行深入探索
-- 举例：
-    - 尝试在抓取阶段实现有效的垂直抓取
-    - 尝试抓取其它学校资源并整合
-    - 尝试实现其它的概率模型
-    - 尝试设计新颖的展示界面
-
-
-
 
 # 实现流程
 
@@ -71,10 +63,17 @@ password: 01c6023dacda00474e342dc0ba449ac06eaf44c7
 - 清华校内网页（不包括图书馆）资源
 - 种子至少包含http://news.tsinghua.edu.cn/
 - 使用正则表达式对URL进行过滤
-    - 过滤无关格式.*(?i)\.(mso|tar|txt|asx|asf|bz2|mpe?g|MPE?G| tiff?|gif|GIF|png|PNG|ico|ICO|css|sit|eps|wmf|zip|pptx?|xlsx?|gz|rpm|tgz|mov|MOV|exe|jpe?g|JPE?G|bmp|BMP|docx?|DOCX?|pdf|PDF|rar|RAR|jar|JAR|ZIP|zip|gz|GZ|wma|WMA|rm|RM|rmvb|RMVB|avi|AVI|swf|SWF|mp3|MP3|wmv|WMV|ps|PS)$
-    - 保留文档  .*(?i)\.(mso|tar|txt|asx|asf|bz2|mpe?g|MPE?G| tiff?|gif|GIF|png|PNG|ico|ICO|css|sit|eps|wmf|zip|pptx?|xlsx?|gz|rpm|tgz|mov|MOV|exe|jpe?g|JPE?G|bmp|BMP|rar|RAR|jar|JAR|ZIP|zip|gz|GZ|wma|WMA|rm|RM|rmvb|RMVB|avi|AVI|swf|SWF|mp3|MP3|wmv|WMV|ps|PS)$
-    - 去除奇怪链接：  .*(?i)\.(mso|tar|txt|asx|asf|bz2|mpe?g|MPE?G| tiff?|gif|GIF|png|PNG|ico|ICO|css|sit|eps|wmf|zip|pptx?|xlsx?|gz|rpm|tgz|mov|MOV|exe|jpe?g|JPE?G|bmp|BMP|rar|RAR|jar|JAR|ZIP|zip|gz|GZ|wma|WMA|rm|RM|rmvb|RMVB|avi|AVI|swf|SWF|mp3|MP3|wmv|WMV|ps|PS|d|dd|yyyy|nivo-nextNav|xiao_ming)$
+    - 过滤无关页面，过滤无关格式文件，，保留html页面和pdf,word文档，去除奇怪链接：  .*(?i)\.(mso|tar|txt|asx|asf|bz2|mpe?g|MPE?G| tiff?|gif|GIF|png|PNG|ico|ICO|css|sit|eps|wmf|zip|pptx?|xlsx?|gz|rpm|tgz|mov|MOV|exe|jpe?g|JPE?G|bmp|BMP|rar|RAR|jar|JAR|ZIP|zip|gz|GZ|wma|WMA|rm|RM|rmvb|RMVB|avi|AVI|swf|SWF|mp3|MP3|wmv|WMV|ps|PS|d|dd|yyyy|nivo-nextNav|xiao_ming)$
     - 禁止抓取图书馆资源：  [\S]*lib.tsinghua.edu.cn[\S]*；[\S]*166.111.120.[\S]*
+
+### Heritrix 抓取过程中遇到的问题
+
+#### 页面剔除问题
+
+在抓取过程中发现了部分
+
+####  Heritrix 加速问题
+
 
 
 ## 构建索引
@@ -83,9 +82,8 @@ password: 01c6023dacda00474e342dc0ba449ac06eaf44c7
 
 ## 检索
 
-# Heritrix 加速问题
 
-![多线程](http://blog.csdn.net/yangding_/article/details/41122977)
+[多线程](http://blog.csdn.net/yangding_/article/details/41122977)
 
 
 ```
