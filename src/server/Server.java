@@ -142,7 +142,7 @@ public class Server extends HttpServlet {
 
                         try {
 							absts[i] = highlighter.getBestFragments(ts, doc.get("content"), 3, "...");
-
+							System.out.println(absts[i].length());
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -157,6 +157,11 @@ public class Server extends HttpServlet {
 							}
 							
 						}
+                        if (absts[i].length() == 0) {
+                        	absts[i] = Indexer.genAbstract(tokens,
+	                                doc.get("content"))
+	                                + " " + doc.get("anchorIn");
+                        }
                     }
 
                 } else {

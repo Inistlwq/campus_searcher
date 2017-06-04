@@ -93,7 +93,7 @@ public class Indexer {
                 String loc = items[0];
                 //String pagerank = items[1];
                 pagerank = Float.parseFloat(items[1]);
-                pagerank = (float) (16 + Math.log(pagerank));
+                pagerank = (float) (Math.sqrt(pagerank));
                 String anchorIn;
                 if (items[2].equals("null")) {
                     if (items[3].equals("null")) {
@@ -284,15 +284,15 @@ public class Indexer {
             }
             Field contentField = new Field("content", content, Field.Store.YES,
                     Field.Index.ANALYZED);
-            doc.add(contentField);
             contentField.setBoost(pagerank);
+            doc.add(contentField);
 
             contentAvgLength += content.length();
 
             Field anchorOutField = new Field("anchorOut", anchorOut,
                     Field.Store.YES, Field.Index.ANALYZED);
-            doc.add(anchorOutField);
             anchorOutField.setBoost(pagerank);
+            doc.add(anchorOutField);
 
             anchorOutAvgLength += anchorOut.length();
             if (anchorOut.length() > 0) {
@@ -301,8 +301,8 @@ public class Indexer {
 
             Field hField = new Field("h", hStr, Field.Store.YES,
                     Field.Index.ANALYZED);
-            doc.add(hField);
             hField.setBoost(pagerank);
+            doc.add(hField);
             hAvgLength += hStr.length();
             if (hStr.length() > 0) {
                 ++hNum;
