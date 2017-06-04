@@ -75,44 +75,7 @@ public class Server extends HttpServlet {
             String[] absts = null;
             String[] paths = null;
             String[] types = null;
-            // TopDocs results = search.searchQuery(queryString, 100);
-            
-            //TopDocs results = search.searchQuery(queryString, 100);
-            //待查找字符串对应的字段
-            /*
-			Analyzer analyzer = new IKAnalyzer(true);//true智能切分
-			String [] to_query = {queryString, queryString,queryString,queryString, queryString};
-			// {"content"};
-            //Occur.MUST表示对应字段必须有查询值， Occur.MUST_NOT 表示对应字段必须没有查询值， Occur.SHOULD(结果“或”)
-            */
-            Occur[] occ={Occur.SHOULD, Occur.SHOULD, Occur.SHOULD, Occur.SHOULD, Occur.SHOULD};
-			String [] fields = Tool.fields;
-			Map<String, Float> boosts = new HashMap<String, Float>();
-			/*
-			 * public static String[] fields = { "title", "h", "anchorIn", "content",
-            "anchorOut" };
-    public static float[] weight = { 1.0f, 0.8f, 0.6f, 0.4f, 0.1f };
-			 * */
-			boosts.put("title", 1.0f);
-			boosts.put("h", 0.8f);
-			boosts.put("anchorIn", 0.6f);    
-			boosts.put("content", 0.4f);
-			boosts.put("anchorOut", 0.1f);
-            Query query = null;
-            MultiFieldQueryParser parser = null;
-			try {
-				parser = new MultiFieldQueryParser(Version.LUCENE_35, fields, new IKAnalyzer(true), boosts);
-				parser.setDefaultOperator(QueryParser.AND_OPERATOR);
-				query = parser.parse(queryString);
-				query.setBoost(1.0f);
-				// search.setSimilarity(new SimpleSimilarity());
-				// query = MultiFieldQueryPsarser.parse(Version.LUCENE_35, to_query,fields,occ,analyzer);
-				System.out.println(query.toString());
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            TopDocs results = search.searchQuery(query, 100);
+            TopDocs results = search.searchQuery(queryString, 100);
             
             if (results != null) {
                 ScoreDoc[] hits = showList(results.scoreDocs, page);
