@@ -410,7 +410,14 @@ public class Indexer {
                     end = endPositions.get(i);
                     ++i;
                 } else {
-                    if (pos - end < range) {
+                    if (pos == end) {
+                        result += content.subSequence(end, pos);
+                        end = endPositions.get(i);
+                        result += "<em>";
+                        result += content.subSequence(pos, end);
+                        result += "</em>";
+                        ++i;
+                    } else if (pos - end < range) {
                         result += content.subSequence(end, pos);
                         end = endPositions.get(i);
                         result += "<em>";

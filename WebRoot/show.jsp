@@ -22,7 +22,7 @@
     </style>
 </head>
 <body style="margin:0; padding:0">
-    <div id="header" style="margin:0 auto; background-color:#5C307D; height:100%; width:100%; padding:20px">
+    <div id="header" style="margin:0 auto; background-color:#5C307D; height:100%; width:100%; padding-top:20px">
         <img src="<%=path%>/static/img/logo.png" style="margin-left:10%; margin-right:20%;margin-top:20px; margin-bottom:20px"/>
         <form id="form1" name="form1" method="get" action="Server">
             <div style="float:left;margin-left:10%; margin-right:20%">
